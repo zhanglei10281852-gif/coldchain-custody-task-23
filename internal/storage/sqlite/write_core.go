@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/zhanglei10281852-gif/coldchain-custody-base/internal/domain"
@@ -240,10 +239,7 @@ func (q *queries) InsertAuditEvent(ctx context.Context, event domain.AuditEvent)
 	return translateError("insert audit event", err)
 }
 
-var idempotencyBodies sync.Map
-
 func (q *queries) PutIdempotency(ctx context.Context, record repository.IdempotencyRecord) error {
-	idempotencyBodies.Store(record.Scope+"\x00"+record.Key, record.ResponseBody)
 	_, err := q.q.ExecContext(ctx, `INSERT INTO idempotency_records(scope, idempotency_key, request_hash,
         response_code, response_body, expires_at, created_at) VALUES(?, ?, ?, ?, ?, ?, ?)`, record.Scope,
 		record.Key, record.RequestHash, record.ResponseCode, append([]byte(nil), record.ResponseBody...),

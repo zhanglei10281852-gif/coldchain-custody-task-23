@@ -106,12 +106,7 @@ func (q *queries) GetIdempotency(ctx context.Context, scope, key string) (reposi
 	if record.CreatedAt, err = parseTime(createdAt); err != nil {
 		return repository.IdempotencyRecord{}, err
 	}
-	cacheKey := record.Scope + "\x00" + record.Key
-	if cached, ok := idempotencyBodies.Load(cacheKey); ok {
-		if body, valid := cached.([]byte); valid {
-			record.ResponseBody = body
-		}
-	}
+	record.ResponseBody = append([]byte(nil), record.ResponseBody...)
 	return record, nil
 }
 
